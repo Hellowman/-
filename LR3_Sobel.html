@@ -1,0 +1,69 @@
+<!--Оператор Собеля-->
+<html>
+<body>
+<table>
+	<tr>
+		<td>Select a File to Load:</td>
+		<td><input type="file" id="fileToLoad"></td>
+		<td><button onclick="loadFileAsImage()">Load Selected File</button><td>
+	</tr>
+</table>
+
+<canvas id="myCanvas" width="400" height="300"
+                style="background-color:#eee; border: 1px solid #ccc; margin:10px;">
+              </canvas>
+<canvas id="myCanvas2" width="400" height="300"
+                style="background-color:#eee; border: 1px solid #ccc; margin:10px;">
+              </canvas>
+
+<script type='text/javascript'>
+
+var canvas=document.getElementById("myCanvas");
+var canvas2=document.getElementById("myCanvas2");
+var ctx=canvas.getContext("2d");
+var ctx2=canvas2.getContext("2d");
+
+function Sobel() { 
+  let h = canvas.height; 
+  let w = canvas.width; 
+  let imgData = ctx.getImageData(0, 0, w, h); 
+  let imgArray = imgData.data; 
+  var Gx, Gy, G; 
+    for (let i=1; i<h-1; i++) { 
+      for (let j=1; j<w-1; j++) { 
+        let P1 = imgArray[((i-1)*w+j-1)*4]; 
+        let P2 = imgArray[((i-1)*w+j)*4]; 
+        let P3 = imgArray[((i-1)*w+j+1)*4]; 
+        let P4 = imgArray[(i*w+j-1)*4]; 
+        let P6 = imgArray[(i*w+j+1)*4]; 
+        let P7 = imgArray[((i+1)*w+j-1)*4]; 
+        let P8 = imgArray[((i+1)*w+j)*4]; 
+        let P9 = imgArray[((i+1)*w+j+1)*4]; 
+        Gx = (P7 + 2*P8 + P9) - (P1 + 2*P2 + P3); 
+        Gу = (P3 + 2*P6 + P9) - (P1 + 2*P4 + P7); 
+        G = Math.sqrt(Gx^2 + Gy^2); 
+        ctx2.globalAlpha = G/255; 
+        ctx2.fillRect(j,i,1,1); 
+      } 
+    }
+ }
+ function loadFileAsImage() { 
+    var fileToLoad = document.getElementById("fileToLoad").files[0]; 
+    var reader = new FileReader(); 
+    reader.onload = function(event){ 
+    var dataUrl = event.target.result, 
+    img = new Image(); 
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    ctx2.clearRect(0, 0, canvas2.width, canvas2.height); 
+    img.onload = function() { 
+    ctx.drawImage(img, 0, 0)
+    }
+    img.src = dataUrl; 
+  }
+  canvas.addEventListener('click', Sobel); 
+  reader.readAsDataURL(fileToLoad); 
+ }
+</script>
+
+</body>
+</html>
