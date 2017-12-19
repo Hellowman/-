@@ -1,0 +1,94 @@
+<!--медианный фильтр-->
+<html>
+<body>
+<table>
+	<tr>
+		<td>Select a File to Load:</td>
+		<td><input type="file" id="fileToLoad"></td>
+		<td><button onclick="loadFileAsImage()">Load Selected File</button><td>
+	</tr>
+</table>
+
+<canvas id="myCanvas" width="800" height="800"
+                style="background-color:#eee; border: 1px solid #ccc; margin:10px;">
+              </canvas>
+<canvas id="myCanvas2" width="800" height="800"
+                style="background-color:#eee; border: 1px solid #ccc; margin:10px;">
+              </canvas>
+
+<script type='text/javascript'>
+
+var canvas=document.getElementById("myCanvas");
+var canvas2=document.getElementById("myCanvas2");
+var ctx=canvas.getContext("2d");
+var ctx2=canvas2.getContext("2d");
+
+function Median_filter() 
+{ 
+
+
+	function cmpNum(a,b)
+	{
+		if (a>b) return 1;
+		if (a<b) return -1;
+		if (a==b) return 0;
+	}
+
+  let h = canvas.height; 
+  let w = canvas.width; 
+  let imgData = ctx.getImageData(0, 0, w, h); 
+  let imgArray = imgData.data; 
+  //var Gx, Gy, G; 
+  var arr_ = [];
+
+    for (let i=1; i<h-1; i++) 
+    { 
+      for (let j=1; j<w-1; j++) 
+      { 
+
+        for (let k=0; k<3; k++)
+        {
+        let P1 = imgArray[((i-1)*w+j-1)*4+k]; 
+        let P2 = imgArray[((i-1)*w+j)*4+k]; 
+        let P3 = imgArray[((i-1)*w+j+1)*4+k]; 
+        let P4 = imgArray[(i*w+j-1)*4+k]; 
+        let P5 = imgArray[(i*w+j)*4+k];
+        let P6 = imgArray[(i*w+j+1)*4+k]; 
+        let P7 = imgArray[((i+1)*w+j-1)*4+k]; 
+        let P8 = imgArray[((i+1)*w+j)*4+k]; 
+        let P9 = imgArray[((i+1)*w+j+1)*4+k]; 
+        var Arr = [P1, P2, P3, P4, P5, P6, P7, P8, P9];
+     
+        Arr.sort(cmpNum);
+        
+        arr_[k] = Math.floor((Arr[0]+Arr[1]+Arr[2]+Arr[3]+Arr[4]+Arr[5]+Arr[6]+Arr[7]+Arr[8])/9);
+
+       }
+       ctx2.fillStyle = "rgb("+arr_[0]+", "+arr_[1]+", "+arr_[2]+")";
+       console.log(arr_[0], arr_[1], arr_[2])
+        ctx2.fillRect(j,i,1,1); 
+      } 
+    }
+ }
+ function loadFileAsImage() 
+ { 
+    var fileToLoad = document.getElementById("fileToLoad").files[0]; 
+    var reader = new FileReader(); 
+    reader.onload = function(event)
+    { 
+    var dataUrl = event.target.result, 
+    img = new Image(); 
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    ctx2.clearRect(0, 0, canvas2.width, canvas2.height); 
+    img.onload = function() { 
+    ctx.drawImage(img, 0, 0)
+    }
+    img.src = dataUrl; 
+  }
+  canvas.addEventListener('click', Median_filter); 
+  reader.readAsDataURL(fileToLoad); 
+ }
+</script>
+
+</body>
+</html>
